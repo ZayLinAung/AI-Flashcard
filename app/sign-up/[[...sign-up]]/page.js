@@ -1,7 +1,7 @@
 import { AppBar, Box, Container, Toolbar, Typography, Button, Link } from "@mui/material";
-import {SignIn} from "@clerk/nextjs"
+import {SignUp} from "@clerk/nextjs"
 
-export default function SignInPage() {
+export default function SignUPPage() {
   return (
     <Container maxWidth="100vw">
       <AppBar position="static" sx={{ backgroundColor: "#3f51b5" }}>
@@ -26,9 +26,9 @@ export default function SignInPage() {
         alignItems="center"
         justifyContent="center">
         <Typography variant="h4"gutterBottom sx={{mt: 2}}>
-            Sign in
+            Sign Up
         </Typography>
-        <SignIn />
+        <SignUp />
       </Box>
     </Container>
   );

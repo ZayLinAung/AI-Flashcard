@@ -27,8 +27,8 @@ export default function Home() {
             Flashcard SaaS
           </Typography>
           <SignedOut>
-            <Button color="inherit">Log in</Button>
-            <Button color="inherit"> Sign up</Button>
+            <Button color="inherit" href="/sign-in">{""}Log in</Button>
+            <Button color="inherit"href="/sign-up">Sign up</Button>
           </SignedOut>
           <SignedIn>
             <UserButton />
