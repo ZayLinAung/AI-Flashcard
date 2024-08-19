@@ -17,6 +17,7 @@
     "@stripe/stripe-js": "^4.3.0",
     "clerk": "^0.8.3",
     "firebase": "^10.12.5",
+    "gemini-ai": "^2.2.1",
     "next": "14.2.5",
     "openai": "^4.55.5",
     "react": "^18",
