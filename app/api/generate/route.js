@@ -34,7 +34,6 @@ export async function POST(req) {
     console.log("here are the falshcards:" , flashcards);
     
 
-
     return NextResponse.json(flashcards);
   } catch (error) {
     console.error("Error generating flashcards:", error);
