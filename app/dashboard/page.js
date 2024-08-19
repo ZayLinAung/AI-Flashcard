@@ -1,6 +1,7 @@
 'use client'
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from 'next/navigation'
 import {
     File,
     Home,
@@ -16,7 +17,8 @@ import {
     ShoppingCart,
     Users2,
     Plus,
-    Folders
+    Folders,
+    Info
 } from "lucide-react"
 
 import {
@@ -74,23 +76,27 @@ import { UserButton } from '@clerk/nextjs'
 export function Dashboard() {
     const { userId, getToken } = useAuth();
     const [sets, setSets] = useState([])
+    const [cards, setCards] = useState([])
+    const router = useRouter()
 
-    // Grab cards
+    // Fetch sets and cards
     useEffect(() => {
         const fetchSets = async () => {
             const token = await getToken({ template: "supabase" }); // from Clerk's jwt template 
-            // console.log('token: ', token);
-            // console.log('userId: ', userId);
 
             const queriedSets = await getSets({ userId, token });
             setSets(queriedSets);
         }
+        const fetchCards = async () => {
+            const token = await getToken({ template: "supabase" }); // from Clerk's jwt template 
+
+            const queriedCards = await getCards({ userId, token });
+            setCards(queriedCards);
+        };
+
+        fetchCards();
         fetchSets();
     }, [])
-
-    console.log('sets: ', sets);
-
-
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -232,12 +238,18 @@ export function Dashboard() {
                                         Export
                                     </span>
                                 </Button>
-                                <Button size="sm" className="h-8 gap-1">
-                                    <PlusCircle className="h-3.5 w-3.5" />
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                        Add Product
-                                    </span>
-                                </Button>
+
+                                <Link
+                                    href="/new_set"
+                                >
+                                    <Button size="sm" className="h-8 gap-1">
+                                        <PlusCircle className="h-3.5 w-3.5" />
+                                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                            New Set
+                                        </span>
+                                    </Button>
+                                </Link>
+
                             </div>
                         </div>
                         <TabsContent value="all">
@@ -245,7 +257,7 @@ export function Dashboard() {
 
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
                                     <CardHeader>
-                                        <CardTitle>Products</CardTitle>
+                                        <CardTitle>Flashcard Sets</CardTitle>
                                         <CardDescription>
                                             Manage your products and view their sales performance.
                                         </CardDescription>
@@ -264,9 +276,7 @@ export function Dashboard() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead className="hidden w-[100px] sm:table-cell">
-                                                    <span className="sr-only">Image</span>
-                                                </TableHead>
+
                                                 <TableHead>Name</TableHead>
                                                 <TableHead>Description</TableHead>
                                                 <TableHead className="hidden md:table-cell">
@@ -283,16 +293,11 @@ export function Dashboard() {
                                         {/* Table body */}
                                         <TableBody>
                                             {sets && sets.map((set, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell className="hidden sm:table-cell">
-                                                        <Image
-                                                            alt="Product image"
-                                                            className="aspect-square rounded-md object-cover"
-                                                            height="64"
-                                                            src={set.image_url ? set.image_url : ''}
-                                                            width="64"
-                                                        />
-                                                    </TableCell>
+                                                <TableRow key={index}
+                                                    onClick={() => router.push(`/dashboard/${set.id}`)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+
                                                     <TableCell className="font-medium">
                                                         {set.title}
                                                     </TableCell>
@@ -300,7 +305,10 @@ export function Dashboard() {
                                                         {set.desc}
                                                     </TableCell>
                                                     <TableCell className="hidden md:table-cell">
-                                                        20
+                                                        {/* Display card count */}
+                                                        {
+                                                            cards.reduce((accumulator, card) => card.setId == set.id ? accumulator += 1 : accumulator, 0)
+                                                        }
                                                     </TableCell>
                                                     <TableCell className="hidden md:table-cell">
                                                         {new Date(set.created_at).toLocaleDateString()}
@@ -326,6 +334,8 @@ export function Dashboard() {
                                                         </DropdownMenu>
                                                     </TableCell>
                                                 </TableRow>
+
+
                                             ))}
 
 
