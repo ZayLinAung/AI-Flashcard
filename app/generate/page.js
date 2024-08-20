@@ -28,10 +28,8 @@ import {
 } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 
 export default function Generate() {
-  const { userId, getToken } = useAuth();
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcards, setFlashCards] = useState([]);
   const [flipped, setFlipped] = useState([]);
@@ -105,11 +103,7 @@ export default function Generate() {
         return;
       } else {
         collections.push({ name });
-        batch.set(
-          userDocRef,
-          { flashcards: collections, userId: userId },
-          { merge: true }
-        );
+        batch.set(userDocRef, { flashcards: collections }, { merge: true });
       }
     } else {
       batch.set(userDocRef, { flashcards: [{ name }] });
@@ -181,16 +175,14 @@ export default function Generate() {
                       >
                         <Box
                           sx={{
-                            position: "absolute",
+                            position: "relative",
                             width: "100%",
                             height: "100%",
-                            backfaceVisibility: "hidden",
                             transition: "transform 0.6s",
                             transformStyle: "preserve-3d",
                             transform: flipped[index]
                               ? "rotateY(180deg)"
                               : "rotateY(0deg)",
-                            boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
                           }}
                         >
                           <Box
@@ -198,14 +190,27 @@ export default function Generate() {
                               position: "absolute",
                               width: "100%",
                               height: "100%",
+                              backfaceVisibility: "hidden",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                               padding: 2,
                               boxSizing: "border-box",
+                              backgroundColor: "white",
+                              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+                              overflow: "auto",
                             }}
                           >
-                            <Typography variant="h5" component="div">
+                            <Typography
+                              variant="h5"
+                              component="div"
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                overflowY: "auto",
+                                wordWrap: "break-word",
+                              }}
+                            >
                               {flashcard.front}
                             </Typography>
                           </Box>
@@ -214,15 +219,28 @@ export default function Generate() {
                               position: "absolute",
                               width: "100%",
                               height: "100%",
+                              backfaceVisibility: "hidden",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                               padding: 2,
                               boxSizing: "border-box",
+                              backgroundColor: "white",
                               transform: "rotateY(180deg)",
+                              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+                              overflow: "auto",
                             }}
                           >
-                            <Typography variant="h5" component="div">
+                            <Typography
+                              variant="h5"
+                              component="div"
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                overflowY: "auto",
+                                wordWrap: "break-word",
+                              }}
+                            >
                               {flashcard.back}
                             </Typography>
                           </Box>

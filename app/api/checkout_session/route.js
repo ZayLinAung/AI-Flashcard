@@ -1,4 +1,6 @@
 import Stripe from 'stripe'
+import { loadStripe } from '@stripe/stripe-js';
+
 import {NextResponse} from "next/server"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -9,7 +11,8 @@ const formatAmountForStripe = (amount,currency) => {
 
 
 export async function GET(req,{params}) {
-  const searchParams = req.nextUrl.searchParams()
+  // const searchParams = req.nextUrl.searchParams()
+  const searchParams = new URL(req.url).searchParams;
   const session_id = searchParams.get("session_id")
 
   try {
