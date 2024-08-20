@@ -124,11 +124,11 @@ export function Dashboard() {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Link
-                                href="/new_set"
+                                href="/generate"
                                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                             >
                                 <Plus className="h-5 w-5" />
-                                <span className="sr-only">New Set</span>
+                                <span className="sr-only" >New Set</span>
                             </Link>
                         </TooltipTrigger>
                         <TooltipContent side="right">New Set</TooltipContent>
@@ -240,7 +240,7 @@ export function Dashboard() {
                                 </Button>
 
                                 <Link
-                                    href="/new_set"
+                                    href="/generate"
                                 >
                                     <Button size="sm" className="h-8 gap-1">
                                         <PlusCircle className="h-3.5 w-3.5" />
