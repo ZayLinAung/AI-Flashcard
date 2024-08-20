@@ -3,47 +3,44 @@
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc } from "firebase/firestore";
 import { db } from "@/firebase";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import {
-    Container,
-    Box,
-    Card,
-    CardContent,
-    Grid,
-    Typography,
-    CardActionArea,
+  Container,
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+  CardActionArea,
 } from "@mui/material";
 
 export default function Flashcard() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcards, setFlashcards] = useState([]);
   const [flipped, setFlipped] = useState([]);
- 
 
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
 
   useEffect(() => {
     async function getFlashcard() {
-        if (!search || !user) return;
-  
-        const colRef = collection(doc(collection(db, "users"), user.id) search);
-        const docs = await getDocs(colRef)
-        const flashcards = [];
-  
-        docs.forEach((doc) => {
-          flashcards.push({ id: doc.id, ...doc.data() });
-        });
-        setFlashcards(flashcards);
-        setFlipped(new Array(flashcards.length).fill(false));  
-   
+      if (!search || !user) return;
+
+      const colRef = collection(doc(collection(db, "users"), user.id), search);
+      const docs = await getDocs(colRef);
+      const flashcards = [];
+
+      docs.forEach((doc) => {
+        flashcards.push({ id: doc.id, ...doc.data() });
+      });
+      setFlashcards(flashcards);
+      setFlipped(new Array(flashcards.length).fill(false));
     }
     getFlashcard();
   }, [user, search]);
-  
 
   const handleCardClick = (index) => {
     setFlipped((prev) => {
@@ -60,10 +57,6 @@ export default function Flashcard() {
   return (
     <Container maxWidth="100vw">
       <Grid container spacing={3} sx={{ mt: 4 }}>
-        {flashcards.length > 0 && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5">Flashcard Preview</Typography>
-            <Grid container spacing={3}>
               {flashcards.map((flashcard, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <Card>
@@ -131,9 +124,6 @@ export default function Flashcard() {
                   </Card>
                 </Grid>
               ))}
-            </Grid>
-          </Box>
-        )}
       </Grid>
     </Container>
   );
