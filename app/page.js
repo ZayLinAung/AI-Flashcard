@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,6 +25,29 @@ import Head from "next/head";
 import { grey } from "@mui/material/colors";
 
 export default function Home() {
+  const handleSubmit = async () => {
+    const checkoutSession = await fetch("/api/checkout_session" ,{
+      method: "POST",
+      headers: {
+        origin: "http://localhost:3000/",
+
+      },
+    })
+    const checkoutSessionJson = await checkoutSession.json()
+
+    if(checkoutSession.statusCode === 500) {
+       console.error(checkoutSession.message)
+      return
+      }
+    const stripe = await getStripe
+    const {error} = await stripe.redirectToCheckout({
+      sessionId: checkoutSessionJson.id
+    })
+    if (error) {
+      console.warn(error.message)
+    }
+
+  }
   return (
     <div className="max-w-[1200px] mx-auto">
       <header className="flex justify-between items-center p-6 bg-white dark:bg-gray-800 ">
@@ -112,7 +137,7 @@ export default function Home() {
                   <li>- Access to AI Chart Analytics</li>
                 </ul>
               </span>
-              <Button className="flex items-center gap-x-2 mt-5">
+              <Button className="flex items-center gap-x-2 mt-5" onClick={handleSubmit}>
                 Choose Pro
               </Button>
             </div>
