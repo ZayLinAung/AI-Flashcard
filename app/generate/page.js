@@ -225,7 +225,7 @@ export default function Generate() {
             ))}
           </Grid>
           <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" color="secondary" onClick={handleOpen}>
+            <Button variant="contained" color="secondary" onClick={handleOpen} gutterBottom>
               Save
             </Button>
           </Box>
