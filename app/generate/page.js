@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import {db} from "@/firebase"
+import { db } from "@/firebase";
 import {
   Container,
   Box,
@@ -19,12 +19,19 @@ import {
   DialogTitle,
   Dialog,
 } from "@mui/material";
-import { writeBatch, doc, collection, getDoc, setDoc} from "firebase/firestore";  
+import {
+  writeBatch,
+  doc,
+  collection,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { useAuth } from "@clerk/nextjs";
 
 export default function Generate() {
+  const { userId, getToken } = useAuth();
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcards, setFlashCards] = useState([]);
   const [flipped, setFlipped] = useState([]);
@@ -33,39 +40,38 @@ export default function Generate() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
- const handleSubmit = () => {
-  fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain",
-    },
-    body: text,
-  })
-    .then((res) => {
-      // Log the response text to check for issues
-      return res.text().then((text) => {
-        console.log("Response text:", text);
-        return JSON.parse(text); // Manually parse JSON
-      });
+  const handleSubmit = () => {
+    fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+      body: text,
     })
-    .then((data) => {
-      console.log("Data received:", data);
+      .then((res) => {
+        // Log the response text to check for issues
+        return res.text().then((text) => {
+          console.log("Response text:", text);
+          return JSON.parse(text); // Manually parse JSON
+        });
+      })
+      .then((data) => {
+        console.log("Data received:", data);
 
-      if (data.flashcard && Array.isArray(data.flashcard)) {
-        setFlashCards(data.flashcard);
-        setFlipped(new Array(data.flashcard.length).fill(false));
-      } else {
+        if (data.flashcard && Array.isArray(data.flashcard)) {
+          setFlashCards(data.flashcard);
+          setFlipped(new Array(data.flashcard.length).fill(false));
+        } else {
+          setFlashCards([]);
+          setFlipped([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error generating flashcards:", error);
         setFlashCards([]);
         setFlipped([]);
-      }
-    })
-    .catch((error) => {
-      console.error("Error generating flashcards:", error);
-      setFlashCards([]);
-      setFlipped([]);
-    });
-};
-  
+      });
+  };
 
   const handleCardClick = (index) => {
     setFlipped((prev) => {
@@ -99,7 +105,11 @@ export default function Generate() {
         return;
       } else {
         collections.push({ name });
-        batch.set(userDocRef, { flashcards: collections }, { merge: true });
+        batch.set(
+          userDocRef,
+          { flashcards: collections, userId: userId },
+          { merge: true }
+        );
       }
     } else {
       batch.set(userDocRef, { flashcards: [{ name }] });
@@ -225,7 +235,12 @@ export default function Generate() {
             ))}
           </Grid>
           <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" color="secondary" onClick={handleOpen} gutterBottom>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleOpen}
+              gutterBottom
+            >
               Save
             </Button>
           </Box>

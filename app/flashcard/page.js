@@ -3,14 +3,13 @@
 import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
-import { collection, doc, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
     Container,
     Box,
-    Button,
     Card,
     CardContent,
     Grid,
@@ -22,28 +21,25 @@ export default function Flashcard() {
   const { isLoaded, isSignedIn, user } = useUser();
   const [flashcards, setFlashcards] = useState([]);
   const [flipped, setFlipped] = useState([]);
-  const router = useRouter();
+ 
 
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
 
   useEffect(() => {
     async function getFlashcard() {
-      try {
         if (!search || !user) return;
   
-        const colRef = collection(db, "users", user.id, search);
-        const querySnapshot = await getDocs(colRef);
+        const colRef = collection(doc(collection(db, "users"), user.id) search);
+        const docs = await getDocs(colRef)
         const flashcards = [];
   
-        querySnapshot.forEach((doc) => {
+        docs.forEach((doc) => {
           flashcards.push({ id: doc.id, ...doc.data() });
         });
         setFlashcards(flashcards);
         setFlipped(new Array(flashcards.length).fill(false));  
-      } catch (error) {
-        console.error("Error fetching flashcards:", error);
-      }
+   
     }
     getFlashcard();
   }, [user, search]);
@@ -136,11 +132,6 @@ export default function Flashcard() {
                 </Grid>
               ))}
             </Grid>
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-              <Button variant="contained" color="secondary" onClick={handleOpen} gutterBottom>
-                Save
-              </Button>
-            </Box>
           </Box>
         )}
       </Grid>
