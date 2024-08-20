@@ -1,17 +1,16 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { collectionReference, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { Router } from "lucide-react";
-import { CardActionArea, Typography, Container, Card, Grid } from "@mui/material";
+import { CardActionArea, Typography, Container, Card, Grid, CardContent } from "@mui/material";
 
 export default function Flashcards() {
   const { isLoaded, isSignedIn, user } = useUser();
-  const { flashcards, setFlashcards } = useState([]);
+  const [flashcards, setFlashcards] = useState([]); 
   const router = useRouter();
 
   useEffect(() => {
@@ -29,6 +28,7 @@ export default function Flashcards() {
     }
     getFlashcards();
   }, [user]);
+
   if (!isLoaded || !isSignedIn) {
     return <></>;
   }
@@ -46,21 +46,27 @@ export default function Flashcards() {
           mt: 4,
         }}
       >
-        {flashcards.map((flashcard, index) => (
-        <Grid item xs={12} sm={6} md={4} key={index}>
-          <Card>
-            <CardActionArea
-              onClic={() => {
-                handleCardClick(id);
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6">{flashcard.name}</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
-        ))}
+        {flashcards.length > 0 ? ( 
+          flashcards.map((flashcard, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card>
+                <CardActionArea
+                  onClick={() => {
+                    handleCardClick(flashcard.name);
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6">{flashcard.name}</Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="h6" sx={{ mt: 4 }}>
+            No flashcards available.
+          </Typography>
+        )}
       </Grid>
     </Container>
   );
