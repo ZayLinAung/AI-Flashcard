@@ -1,21 +1,67 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import { SignIn, SignedOut, SignInButton, SignOutButton, SignUpButton, SignedIn } from "@clerk/nextjs";
-import { Sprout, Flower2 } from "lucide-react";
+"use client";
 
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import {
+  SignIn,
+  SignedOut,
+  SignInButton,
+  SignOutButton,
+  SignUpButton,
+  SignedIn,
+} from "@clerk/nextjs";
+import { Sprout, Flower2 } from "lucide-react";
+import getStripe from "@/utils/get-stripe";
 
 export default function Home() {
+  const handleSubmit = async () => {
+    try {
+      const checkoutSession = await fetch("/api/checkout_session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const checkoutSessionJson = await checkoutSession.json();
+
+      if (checkoutSession.status === 500) {
+        console.error(checkoutSessionJson.message);
+        return;
+      }
+
+      
+      const stripe = await getStripe(); 
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: checkoutSessionJson.id,
+      });
+
+      if (error) {
+        console.warn(error.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+
   return (
     <div className="max-w-[1200px] mx-auto">
       <header className="flex justify-between items-center p-6 bg-white dark:bg-gray-800 ">
-        <Link href="#" className="flex items-center text-4xl font-bold" prefetch={false}>
+        <Link
+          href="http://localhost:3000/"
+          className="flex items-center text-4xl font-bold"
+          prefetch={false}
+        >
           <span>CramIt</span>
         </Link>
         <nav className="space-x-4">
-
           {/* Display when users are logged out */}
-          <Link href="#" className="text-lg text-gray-700 dark:text-white" prefetch={false}>
+          <Link
+            href="#"
+            className="text-lg text-gray-700 dark:text-white"
+            prefetch={false}
+          >
             <SignedOut>
               <SignInButton />
             </SignedOut>
@@ -35,9 +81,11 @@ export default function Home() {
         </nav>
       </header>
 
-
       <div className="flex flex-col items-center pt-32">
-        <section id="hero" className="flex flex-col justify-center items-center">
+        <section
+          id="hero"
+          className="flex flex-col justify-center items-center"
+        >
           <h1 className="text-5xl lg:text-6xl xl:text-7xl font-semibold text-balance text-center font-heading">
             A simple way to solve your last minute cram
           </h1>
@@ -60,7 +108,6 @@ export default function Home() {
             Features
           </h3>
           <div className="grid lg:grid-cols-2 gap-10 mt-10 relative">
-
             <div className="w-full h-full bg-white border border-zinc-200 p-5 rounded-3xl rounded-br-none space-y-2 flex flex-col items-center">
               <Sprout />
               <h4 className="text-base font-medium text-balance">Free Plan</h4>
@@ -71,6 +118,9 @@ export default function Home() {
                   <li>- 3 AI Card Generation/Day</li>
                 </ul>
               </span>
+              <Button className="flex items-center gap-x-2 mt-5">
+                Choose basic
+              </Button>
             </div>
 
             <div className="w-full h-full bg-white border border-zinc-200 p-5 rounded-3xl rounded-bl-none space-y-2 flex flex-col items-center">
@@ -84,8 +134,13 @@ export default function Home() {
                   <li>- Access to AI Chart Analytics</li>
                 </ul>
               </span>
+              <Button
+                className="flex items-center gap-x-2 mt-5"
+                onClick={handleSubmit}
+              >
+                Choose Pro
+              </Button>
             </div>
-
           </div>
         </section>
       </div>
