@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import {db} from "@/firebase"
+import { db } from "@/firebase";
 import {
   Container,
   Box,
@@ -19,10 +19,15 @@ import {
   DialogTitle,
   Dialog,
 } from "@mui/material";
-import { writeBatch, doc, collection, getDoc, setDoc} from "firebase/firestore";  
+import {
+  writeBatch,
+  doc,
+  collection,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 
 export default function Generate() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -33,39 +38,38 @@ export default function Generate() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
- const handleSubmit = () => {
-  fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain",
-    },
-    body: text,
-  })
-    .then((res) => {
-      // Log the response text to check for issues
-      return res.text().then((text) => {
-        console.log("Response text:", text);
-        return JSON.parse(text); // Manually parse JSON
-      });
+  const handleSubmit = () => {
+    fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+      body: text,
     })
-    .then((data) => {
-      console.log("Data received:", data);
+      .then((res) => {
+        // Log the response text to check for issues
+        return res.text().then((text) => {
+          console.log("Response text:", text);
+          return JSON.parse(text); // Manually parse JSON
+        });
+      })
+      .then((data) => {
+        console.log("Data received:", data);
 
-      if (data.flashcard && Array.isArray(data.flashcard)) {
-        setFlashCards(data.flashcard);
-        setFlipped(new Array(data.flashcard.length).fill(false));
-      } else {
+        if (data.flashcard && Array.isArray(data.flashcard)) {
+          setFlashCards(data.flashcard);
+          setFlipped(new Array(data.flashcard.length).fill(false));
+        } else {
+          setFlashCards([]);
+          setFlipped([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error generating flashcards:", error);
         setFlashCards([]);
         setFlipped([]);
-      }
-    })
-    .catch((error) => {
-      console.error("Error generating flashcards:", error);
-      setFlashCards([]);
-      setFlipped([]);
-    });
-};
-  
+      });
+  };
 
   const handleCardClick = (index) => {
     setFlipped((prev) => {
@@ -171,16 +175,14 @@ export default function Generate() {
                       >
                         <Box
                           sx={{
-                            position: "absolute",
+                            position: "relative",
                             width: "100%",
                             height: "100%",
-                            backfaceVisibility: "hidden",
                             transition: "transform 0.6s",
                             transformStyle: "preserve-3d",
                             transform: flipped[index]
                               ? "rotateY(180deg)"
                               : "rotateY(0deg)",
-                            boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
                           }}
                         >
                           <Box
@@ -188,14 +190,27 @@ export default function Generate() {
                               position: "absolute",
                               width: "100%",
                               height: "100%",
+                              backfaceVisibility: "hidden",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                               padding: 2,
                               boxSizing: "border-box",
+                              backgroundColor: "white",
+                              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+                              overflow: "auto",
                             }}
                           >
-                            <Typography variant="h5" component="div">
+                            <Typography
+                              variant="h5"
+                              component="div"
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                overflowY: "auto",
+                                wordWrap: "break-word",
+                              }}
+                            >
                               {flashcard.front}
                             </Typography>
                           </Box>
@@ -204,15 +219,28 @@ export default function Generate() {
                               position: "absolute",
                               width: "100%",
                               height: "100%",
+                              backfaceVisibility: "hidden",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                               padding: 2,
                               boxSizing: "border-box",
+                              backgroundColor: "white",
                               transform: "rotateY(180deg)",
+                              boxShadow: "0 4px 8px 0 rgba(0,0,0,0.2)",
+                              overflow: "auto",
                             }}
                           >
-                            <Typography variant="h5" component="div">
+                            <Typography
+                              variant="h5"
+                              component="div"
+                              sx={{
+                                width: "100%",
+                                height: "100%",
+                                overflowY: "auto",
+                                wordWrap: "break-word",
+                              }}
+                            >
                               {flashcard.back}
                             </Typography>
                           </Box>
@@ -225,7 +253,12 @@ export default function Generate() {
             ))}
           </Grid>
           <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-            <Button variant="contained" color="secondary" onClick={handleOpen} gutterBottom>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleOpen}
+              gutterBottom
+            >
               Save
             </Button>
           </Box>
