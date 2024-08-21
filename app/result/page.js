@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import getStripe from "@/utils/get-stripe"
-import { useSearchParams } from "next/navigation"
-import { CircularProgress, Typography, Container } from "@mui/material"
+import { useEffect, useState, getSets } from "react"
 
-const resultPage = () => {
-    const router = useRouter()
+
+import { useSearchParams } from "next/navigation"
+import { CircularProgress, Typography, Container, Box } from "@mui/material"
+
+const ResultPage = () => {
     const searchParams = useSearchParams()
     const session_id = searchParams.get("session_id")
 
@@ -58,12 +57,12 @@ const resultPage = () => {
     }
 
     return (
-        <container maxWidth="100vw" sx={{textAlign: "center", mt:4 }}> 
+        <Container maxWidth="100vw" sx={{textAlign: "center", mt:4 }}> 
 
             {
                 session.payment_status === "paid" ? (
                     <>
-                    <Typography varinat="h4"> 
+                    <Typography variant="h4"> 
                         Thank you for purchasing
                     </Typography>
                     <Box sx={{mt:22}}>
@@ -84,13 +83,13 @@ const resultPage = () => {
                         Session Id: {session_id}
                     </Typography>
                     <Typography variant="body1">
-                        Your payment couldn't be processed. 
+                        Your payment could not be processed. 
                     </Typography>
                 </Box></>
                     
                 )
             }
-        </container>
+        </Container>
     )
 }
-export default resultPage
+export default ResultPage

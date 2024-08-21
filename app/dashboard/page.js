@@ -5,11 +5,8 @@ import { useRouter } from 'next/navigation'
 import {
     File,
     Home,
-    LineChart,
     ListFilter,
     MoreHorizontal,
-    Package,
-    Package2,
     PanelLeft,
     PlusCircle,
     Search,
@@ -63,14 +60,8 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { useAuth } from "@clerk/nextjs"
 import { useEffect, useState } from "react"
-import { getCards, getSets } from "@/lib/supabaseRequests"
 import { UserButton } from '@clerk/nextjs'
 import {
     writeBatch,
