@@ -72,31 +72,52 @@ import { useAuth } from "@clerk/nextjs"
 import { useEffect, useState } from "react"
 import { getCards, getSets } from "@/lib/supabaseRequests"
 import { UserButton } from '@clerk/nextjs'
+import {
+    writeBatch,
+    doc,
+    collection,
+    getDoc,
+    setDoc,
+    deleteDoc,
+    arrayRemove,
+    updateDoc
+} from "firebase/firestore";
+import { db } from "@/firebase";
+import { useUser } from "@clerk/nextjs";
+
+
 
 export function Dashboard() {
     const { userId, getToken } = useAuth();
+    const { isLoaded, isSignedIn, user } = useUser();
+
     const [sets, setSets] = useState([])
-    const [cards, setCards] = useState([])
+    // const [cards, setCards] = useState([])
     const router = useRouter()
 
-    // Fetch sets and cards
-    useEffect(() => {
-        const fetchSets = async () => {
-            const token = await getToken({ template: "supabase" }); // from Clerk's jwt template 
+    // Fetch sets
+    async function getSets() {
+        if (!userId) return;
+        const docRef = doc(collection(db, "users"), userId);
 
-            const queriedSets = await getSets({ userId, token });
-            setSets(queriedSets);
+        const docSnap = await getDoc(docRef);
+        console.log('docSnap: ', docSnap);
+
+        if (docSnap.exists()) {
+            const collection = docSnap.data().flashcards || [];
+            console.log('collection: ', collection);
+
+            setSets(collection);
+        } else {
+            await setDoc(docRef, { flashcards: [] });
         }
-        const fetchCards = async () => {
-            const token = await getToken({ template: "supabase" }); // from Clerk's jwt template 
+    }
+    useEffect(() => {
 
-            const queriedCards = await getCards({ userId, token });
-            setCards(queriedCards);
-        };
+        getSets();
 
-        fetchCards();
-        fetchSets();
-    }, [])
+    }, []);
+
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -278,13 +299,13 @@ export function Dashboard() {
                                             <TableRow>
 
                                                 <TableHead>Name</TableHead>
-                                                <TableHead>Description</TableHead>
+                                                {/* <TableHead>Description</TableHead> */}
                                                 <TableHead className="hidden md:table-cell">
                                                     # of Cards
                                                 </TableHead>
-                                                <TableHead className="hidden md:table-cell">
+                                                {/* <TableHead className="hidden md:table-cell">
                                                     Created at
-                                                </TableHead>
+                                                </TableHead> */}
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
                                                 </TableHead>
@@ -294,26 +315,27 @@ export function Dashboard() {
                                         <TableBody>
                                             {sets && sets.map((set, index) => (
                                                 <TableRow key={index}
-                                                    onClick={() => router.push(`/dashboard/${set.id}`)}
-                                                    style={{ cursor: 'pointer' }}
+
                                                 >
 
-                                                    <TableCell className="font-medium">
-                                                        {set.title}
+                                                    <TableCell className="font-medium" onClick={() => router.push(`/dashboard/${set.name}`)}
+                                                        style={{ cursor: 'pointer' }}>
+                                                        {set.name}
                                                     </TableCell>
-                                                    <TableCell>
+                                                    {/* <TableCell>
                                                         {set.desc}
-                                                    </TableCell>
-                                                    <TableCell className="hidden md:table-cell">
+                                                    </TableCell> */}
+                                                    <TableCell className="hidden md:table-cell" onClick={() => router.push(`/dashboard/${set.name}`)}
+                                                        style={{ cursor: 'pointer' }}>
                                                         {/* Display card count */}
-                                                        {
+                                                        {/* {
                                                             cards.reduce((accumulator, card) => card.setId == set.id ? accumulator += 1 : accumulator, 0)
-                                                        }
+                                                        } */}
                                                     </TableCell>
-                                                    <TableCell className="hidden md:table-cell">
+                                                    {/* <TableCell className="hidden md:table-cell">
                                                         {new Date(set.created_at).toLocaleDateString()}
-                                                    </TableCell>
-                                                    <TableCell>
+                                                    </TableCell> */}
+                                                    <TableCell >
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
                                                                 <Button
@@ -329,7 +351,7 @@ export function Dashboard() {
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleDelete(set.name)}>Delete</DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </TableCell>
