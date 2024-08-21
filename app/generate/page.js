@@ -29,24 +29,29 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-
+import Aside from "@/components/aside";
+import Loading from "@/components/loading";
+import { SpinnerIcon } from "@/components/icons";
 
 export default function Generate() {
   const { userId, getToken } = useAuth();
 
   const { isLoaded, isSignedIn, user } = useUser();
-  const [flashcards, setFlashCards] = useState([{
-    front: '',
-    back: '',
-    setName: '',
-  }]);
+  const [flashcards, setFlashCards] = useState([]);
   const [flipped, setFlipped] = useState([]);
   const [text, setText] = useState("");
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = () => {
+
+    if (name.length == 0 || text.length == 0) {
+      alert("Inputs can't be empty!");
+      return;
+    }
+    setIsLoading(true)
     fetch("/api/generate", {
       method: "POST",
       headers: {
@@ -71,15 +76,20 @@ export default function Generate() {
           }));
           setFlashCards(updatedFlashcards);
           setFlipped(new Array(data.flashcard.length).fill(false));
+          setIsLoading(false)
+
         } else {
           setFlashCards([]);
           setFlipped([]);
+          setIsLoading(false)
+
         }
       })
       .catch((error) => {
         console.error("Error generating flashcards:", error);
         setFlashCards([]);
         setFlipped([]);
+        setIsLoading(false)
       });
   };
 
@@ -133,65 +143,77 @@ export default function Generate() {
   };
 
   return (
-    <Container maxWidth="md">
-      <Box
-        sx={{
-          mt: 4,
-          mb: 6,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h4" gutterBottom>
-          Create Flashcard Set
-        </Typography>
+    <>
+      <Aside />
+      <Container maxWidth="lg" className="px-24">
+        <Box
+          sx={{
+            mt: 4,
+            mb: 6,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h4" gutterBottom>
+            Create Flashcard Set
+          </Typography>
 
-        <DialogContentText>
-          Please enter a name for your flashcard set
-        </DialogContentText>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Set Name"
-          type="text"
-          fullWidth
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          variant="outlined"
-        />
-
-        <Paper sx={{ p: 4, width: "100%" }}>
+          <DialogContentText>
+            Please enter a name for your flashcard set
+          </DialogContentText>
           <TextField
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            label="Enter Text for AI to Generate"
+            autoFocus
+            margin="dense"
+            label="Set Name"
+            type="text"
             fullWidth
-            multiline
-            rows={4}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             variant="outlined"
-            sx={{ mb: 2 }}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            fullWidth
-          >
-            Generate
-          </Button>
-        </Paper>
-      </Box>
 
-      {flashcards.length > 0 && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5">Flashcard Preview</Typography>
-          <Grid container spacing={3}>
-            {flashcards.map((flashcard, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card>
-                  <CardActionArea onClick={() => handleCardClick(index)}>
-                    <CardContent>
+          <Paper sx={{ p: 4, width: "100%" }}>
+            <TextField
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              label="Enter Text for AI to Generate"
+              fullWidth
+              multiline
+              rows={4}
+              variant="outlined"
+              sx={{ mb: 2 }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              fullWidth
+              disabled={isLoading}
+              style={{
+                background: "#a855f7"
+              }}
+            >
+              {isLoading ? <SpinnerIcon /> : "Generate"}
+            </Button>
+          </Paper>
+        </Box>
+
+        {flashcards.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" className="text-center mb-2">Flashcard Preview</Typography>
+            <Grid container spacing={2}>
+              {isLoading ? (
+                <SpinnerIcon />
+              ) : (
+                flashcards.map((card, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Box sx={{
+                      position: "relative",
+                      width: "100%",
+                      height: "200px",
+                      cursor: "pointer",
+                    }}
+                      onClick={() => handleCardClick(index)}>
                       <Box
                         sx={{
                           perspective: "1000px",
@@ -229,7 +251,7 @@ export default function Generate() {
                             }}
                           >
                             <Typography
-                              variant="h5"
+                              variant="h6"
                               component="div"
                               sx={{
                                 width: "100%",
@@ -237,8 +259,9 @@ export default function Generate() {
                                 overflowY: "auto",
                                 wordWrap: "break-word",
                               }}
+                              className='flex justify-center items-center'
                             >
-                              {flashcard.front}
+                              {card.front}
                             </Typography>
                           </Box>
                           <Box
@@ -259,7 +282,7 @@ export default function Generate() {
                             }}
                           >
                             <Typography
-                              variant="h5"
+                              variant="h6"
                               component="div"
                               sx={{
                                 width: "100%",
@@ -267,32 +290,36 @@ export default function Generate() {
                                 overflowY: "auto",
                                 wordWrap: "break-word",
                               }}
+                              className='flex justify-center items-center'
+
                             >
-                              {flashcard.back}
+                              {card.back}
                             </Typography>
                           </Box>
                         </Box>
                       </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-          <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={saveFlashCards}
-              gutterBottom
-            >
-              Save
-            </Button>
-          </Box>
-        </Box>
-      )}
+                    </Box>
+                  </Grid>
+                ))
+              )}
 
-      {/* <Dialog open={open} onClose={handleClose}>
+            </Grid>
+            <Box sx={{ mt: 4, display: "flex", justifyContent: "center", mb: 5 }}>
+              <Button
+                variant="contained"
+                onClick={saveFlashCards}
+                gutterBottom
+                style={{
+                  background: "#a855f7"
+                }}
+              >
+                Save
+              </Button>
+            </Box>
+          </Box>
+        )}
+
+        {/* <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Save Flashcard</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -314,6 +341,8 @@ export default function Generate() {
           <Button onClick={saveFlashCards}>Save</Button>
         </DialogActions>
       </Dialog> */}
-    </Container>
+      </Container>
+    </>
+
   );
 }
