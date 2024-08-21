@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import getStripe from "@/utils/get-stripe"
 import { useSearchParams } from "next/navigation"
-import { CircularProgress, Typography, container } from "@mui/material"
+import { CircularProgress, Typography, Container } from "@mui/material"
 
 const resultPage = () => {
     const router = useRouter()
@@ -17,8 +17,8 @@ const resultPage = () => {
 
     useEffect(()=> {
         const fetchCheckoutSession = async () =>{
-            if(!sessionId) 
-                return
+            if(!session_id) 
+                return;
             try{
                 const res = await fetch(`/api/checkout_session?session_id=${session_id}`)
                 const sessionData = await res.json()
@@ -35,7 +35,7 @@ const resultPage = () => {
                 setLoading(false)
             }
         }
-        fetchCheckoutSesion()
+        fetchCheckoutSession()
     }, [session_id])
     if (loading) {
         return(
@@ -68,7 +68,7 @@ const resultPage = () => {
                     </Typography>
                     <Box sx={{mt:22}}>
                         <Typography variant="h6">
-                            Session Id: {session_id}
+                            Session ID: {session_id}
                         </Typography>
                         <Typography variant="body1">
                             We have recieved your payment. You will get an email with the order details shortly
