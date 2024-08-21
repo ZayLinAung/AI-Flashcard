@@ -84,8 +84,8 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useUser } from "@clerk/nextjs";
-
-
+import Aside from "../../components/aside"
+import Loading from "@/components/loading"
 
 export function Dashboard() {
     const { userId, getToken } = useAuth();
@@ -121,41 +121,7 @@ export function Dashboard() {
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
-            <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-                <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-                    <Link
-                        href="/"
-                        className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-                    >
-                        <Home className="h-4 w-4 transition-all group-hover:scale-110" />
-                        <span className="sr-only">Home</span>
-                    </Link>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Link
-                                href="/dashboard"
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                            >
-                                <Folders className="h-5 w-5" />
-                                <span className="sr-only">Sets</span>
-                            </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">Sets</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Link
-                                href="/generate"
-                                className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                            >
-                                <Plus className="h-5 w-5" />
-                                <span className="sr-only" >New Set</span>
-                            </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">New Set</TooltipContent>
-                    </Tooltip>
-                </nav>
-            </aside>
+            <Aside />
             <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
                 <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
                     <Sheet>
@@ -300,9 +266,9 @@ export function Dashboard() {
 
                                                 <TableHead>Name</TableHead>
                                                 {/* <TableHead>Description</TableHead> */}
-                                                <TableHead className="hidden md:table-cell">
+                                                {/* <TableHead className="hidden md:table-cell">
                                                     # of Cards
-                                                </TableHead>
+                                                </TableHead> */}
                                                 {/* <TableHead className="hidden md:table-cell">
                                                     Created at
                                                 </TableHead> */}
@@ -325,13 +291,10 @@ export function Dashboard() {
                                                     {/* <TableCell>
                                                         {set.desc}
                                                     </TableCell> */}
-                                                    <TableCell className="hidden md:table-cell" onClick={() => router.push(`/dashboard/${set.name}`)}
+                                                    {/* <TableCell className="hidden md:table-cell" onClick={() => router.push(`/dashboard/${set.name}`)}
                                                         style={{ cursor: 'pointer' }}>
-                                                        {/* Display card count */}
-                                                        {/* {
-                                                            cards.reduce((accumulator, card) => card.setId == set.id ? accumulator += 1 : accumulator, 0)
-                                                        } */}
-                                                    </TableCell>
+                                                        
+                                                    </TableCell> */}
                                                     {/* <TableCell className="hidden md:table-cell">
                                                         {new Date(set.created_at).toLocaleDateString()}
                                                     </TableCell> */}
@@ -342,6 +305,7 @@ export function Dashboard() {
                                                                     aria-haspopup="true"
                                                                     size="icon"
                                                                     variant="ghost"
+                                                                    className="float-end"
                                                                 >
                                                                     <MoreHorizontal className="h-4 w-4" />
                                                                     <span className="sr-only">Toggle menu</span>
@@ -351,7 +315,7 @@ export function Dashboard() {
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem>Archive</DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => handleDelete(set.name)}>Delete</DropdownMenuItem>
+                                                                <DropdownMenuItem>Delete</DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     </TableCell>
