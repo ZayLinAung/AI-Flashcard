@@ -104,10 +104,8 @@ export function Dashboard() {
         }
     }
     useEffect(() => {
-
         getSets();
-
-    }, []);
+    }, [getSets]);
 
 
     return (
