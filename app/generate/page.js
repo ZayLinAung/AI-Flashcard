@@ -28,10 +28,18 @@ import {
 } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+
 
 export default function Generate() {
+  const { userId, getToken } = useAuth();
+
   const { isLoaded, isSignedIn, user } = useUser();
-  const [flashcards, setFlashCards] = useState([]);
+  const [flashcards, setFlashCards] = useState([{
+    front: '',
+    back: '',
+    setName: '',
+  }]);
   const [flipped, setFlipped] = useState([]);
   const [text, setText] = useState("");
   const [name, setName] = useState("");
@@ -57,7 +65,11 @@ export default function Generate() {
         console.log("Data received:", data);
 
         if (data.flashcard && Array.isArray(data.flashcard)) {
-          setFlashCards(data.flashcard);
+          const updatedFlashcards = data.flashcard.map((flashcard) => ({
+            ...flashcard,
+            setName: name,
+          }));
+          setFlashCards(updatedFlashcards);
           setFlipped(new Array(data.flashcard.length).fill(false));
         } else {
           setFlashCards([]);
@@ -103,7 +115,7 @@ export default function Generate() {
         return;
       } else {
         collections.push({ name });
-        batch.set(userDocRef, { flashcards: collections }, { merge: true });
+        batch.set(userDocRef, { flashcards: collections, userId: userId }, { merge: true });
       }
     } else {
       batch.set(userDocRef, { flashcards: [{ name }] });
@@ -116,7 +128,8 @@ export default function Generate() {
     });
     await batch.commit();
     handleClose();
-    router.push("/flashcard");
+
+    router.push('/dashboard');
   };
 
   return (
@@ -131,14 +144,28 @@ export default function Generate() {
         }}
       >
         <Typography variant="h4" gutterBottom>
-          Your Title Here
+          Create Flashcard Set
         </Typography>
+
+        <DialogContentText>
+          Please enter a name for your flashcard set
+        </DialogContentText>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Set Name"
+          type="text"
+          fullWidth
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          variant="outlined"
+        />
 
         <Paper sx={{ p: 4, width: "100%" }}>
           <TextField
             value={text}
             onChange={(e) => setText(e.target.value)}
-            label="Enter Text"
+            label="Enter Text for AI to Generate"
             fullWidth
             multiline
             rows={4}
@@ -151,7 +178,7 @@ export default function Generate() {
             onClick={handleSubmit}
             fullWidth
           >
-            Submit
+            Generate
           </Button>
         </Paper>
       </Box>
@@ -256,7 +283,7 @@ export default function Generate() {
             <Button
               variant="contained"
               color="secondary"
-              onClick={handleOpen}
+              onClick={saveFlashCards}
               gutterBottom
             >
               Save
@@ -265,7 +292,7 @@ export default function Generate() {
         </Box>
       )}
 
-      <Dialog open={open} onClose={handleClose}>
+      {/* <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Save Flashcard</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -286,7 +313,7 @@ export default function Generate() {
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={saveFlashCards}>Save</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
     </Container>
   );
 }
